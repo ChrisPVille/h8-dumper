@@ -23,21 +23,26 @@ clk_wiz_0 mclk(.clkin(CLK100MHZ),
 //Who needs synchronization anyway
 assign rst_n = CPU_RESETN & locked;
 
-wire[15:0] abus;
-wire[7:0] dbus;
+wire[15:0] abus_pre, abus;
+wire[7:0] dbus_pre, dbus;
 wire[7:0] dout;
 wire tres;
-wire trd;
-wire twr;
+wire trd_pre, trd;
+wire twr_pre, twr;
 wire textal; //Might need to feed inverted clock depending on stray capacitance
 
-assign dbus[7:0] = {JA[10:7],JA[4:1]};
-assign {JA[10:7],JA[4:1]} = !trd ? dout : 8'bz;
+ff_sync #(.WIDTH(16)) async(.clk(clk), .rst_n(rst_n), .in_async(abus_pre), .out(abus));
+ff_sync #(.WIDTH(8)) dsync(.clk(clk), .rst_n(rst_n), .in_async(dbus_pre), .out(dbus));
+ff_sync #(.WIDTH(1)) rsync(.clk(clk), .rst_n(rst_n), .in_async(trd_pre), .out(trd));
+ff_sync #(.WIDTH(1)) wsync(.clk(clk), .rst_n(rst_n), .in_async(twr_pre), .out(twr));
 
-assign abus[15:0] = {JD[10:7],JD[4:1],JC[10:7],JC[4:1]};
+assign dbus_pre[7:0] = {JA[10:7],JA[4:1]};
+assign {JA[10:7],JA[4:1]} = !trd_pre ? dout : 8'bz;
+
+assign abus_pre[15:0] = {JD[10:7],JD[4:1],JC[10:7],JC[4:1]};
 //assign textal = JB[1];
-assign twr = JB[2];
-assign trd = JB[3];
+assign twr_pre = JB[2];
+assign trd_pre = JB[3];
 //assign tres = JB[4];
 
 reg[3:0] swsync;

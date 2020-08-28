@@ -45,7 +45,7 @@ module dcontrol(
                 if(src_addr <= ENDADDR) src_addr <= src_addr + 1;
                 else done <= 1; 
             end
-            else if(addr != 16'hFB7F) already_wrote <= 0;
+            else if((!rd||!wr) && addr != 16'hFB7F) already_wrote <= 0;
         end
     end
     
@@ -55,17 +55,19 @@ module dcontrol(
             data_out <= 8'b0;
             arm <= 0;
         end else begin
+            if(already_wrote) arm <= 0; //The address bus looks a little glitchy. Try to prevent nonsense
+            
             if(!rd && addr==16'hFB70) data_out <= 8'h6A; //MOVE.B @src_addr, R0
             else if(!rd && addr==16'hFB71) data_out <= 8'h00;
             else if(!rd && addr==16'hFB72) data_out <= src_addr[15:8];
             else if(!rd && addr==16'hFB73) data_out <= src_addr[7:0];
-            else if(!rd && addr==16'hFB74) begin //MOVE.B R0, @0xFB7F
-                 data_out <= 8'h6A;
-                 arm <= 1;
-            end
+            else if(!rd && addr==16'hFB74) data_out <= 8'h6A; //MOVE.B R0, @0xFB7F
             else if(!rd && addr==16'hFB75) data_out <= 8'h80;
             else if(!rd && addr==16'hFB76) data_out <= 8'hFB;
-            else if(!rd && addr==16'hFB77) data_out <= 8'h7F;
+            else if(!rd && addr==16'hFB77) begin
+                data_out <= 8'h7F;
+                arm <= 1;
+            end
             else if(!rd && addr==16'hFB78) data_out <= 8'h5A; //JMP 0xFB70
             else if(!rd && addr==16'hFB79) data_out <= 8'h00;
             else if(!rd && addr==16'hFB7A) data_out <= 8'hFB;
