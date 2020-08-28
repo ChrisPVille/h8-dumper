@@ -4,9 +4,12 @@ module top(
     input CPU_RESETN,
     output[15:0] LED,
     input[15:0] SW,
-    inout[10:1] JA,
-    inout[4:1] JB,
-    output JB7,
+    inout[7:1] dbus_pre,
+    output textal,
+    input twr_pre,
+    input trd_pre,
+    output tres,
+    output uart_tx,
     input[10:1] JC,
     input[10:1] JD
     );
@@ -24,26 +27,20 @@ clk_wiz_0 mclk(.clkin(CLK100MHZ),
 assign rst_n = CPU_RESETN & locked;
 
 wire[15:0] abus_pre, abus;
-wire[7:0] dbus_pre, dbus;
+wire[7:0] dbus;
 wire[7:0] dout;
-wire tres;
-wire trd_pre, trd;
-wire twr_pre, twr;
-wire textal; //Might need to feed inverted clock depending on stray capacitance
+wire trd;
+wire twr;
+//Might need to feed inverted clock depending on stray capacitance
 
 ff_sync #(.WIDTH(16)) async(.clk(clk), .rst_n(rst_n), .in_async(abus_pre), .out(abus));
 ff_sync #(.WIDTH(8)) dsync(.clk(clk), .rst_n(rst_n), .in_async(dbus_pre), .out(dbus));
 ff_sync #(.WIDTH(1)) rsync(.clk(clk), .rst_n(rst_n), .in_async(trd_pre), .out(trd));
 ff_sync #(.WIDTH(1)) wsync(.clk(clk), .rst_n(rst_n), .in_async(twr_pre), .out(twr));
 
-assign dbus_pre[7:0] = {JA[10:7],JA[4:1]};
-assign {JA[10:7],JA[4:1]} = !trd_pre ? dout : 8'bz;
+assign dbus_pre = !trd ? dout : 8'bz;
 
 assign abus_pre[15:0] = {JD[10:7],JD[4:1],JC[10:7],JC[4:1]};
-//assign textal = JB[1];
-assign twr_pre = JB[2];
-assign trd_pre = JB[3];
-//assign tres = JB[4];
 
 reg[3:0] swsync;
 always@(posedge clk) swsync <= {swsync[2:0],SW[15]};
@@ -52,10 +49,10 @@ wire capnow;
 ila ila(.clk(clk),
         .probe0(abus),
         .probe1(dbus),
-        .probe2(JB[4]),
+        .probe2(tres),
         .probe3(trd),
         .probe4(twr),
-        .probe5(JB[1]),
+        .probe5(textal),
         .probe6(swsync[3]),
         .probe7(capnow)
         );
@@ -74,7 +71,7 @@ wire fifo_empty;
 //        .probe3(send_byte),
 //        .probe4(fifo_empty),
 //        .probe5(tx_active),
-//        .probe6(JB7),
+//        .probe6(uart_tx),
 //        .probe7(1'b0)
 //        );
         
@@ -82,8 +79,8 @@ glitchy glitchy(
         .clk(clk),
         .rst_n(rst_n),
         .go(swsync[3]),
-        .tres(JB[4]),
-        .textal(JB[1]),
+        .tres(tres),
+        .textal(textal),
         .capnow(capnow)
         );
 
@@ -119,7 +116,7 @@ uart_tx #(.CLKS_PER_BIT(868)) uart(
     .i_Tx_DV(send_byte),
     .i_Tx_Byte(fifo_data),
     .o_Tx_Active(tx_active),
-    .o_Tx_Serial(JB7),
+    .o_Tx_Serial(uart_tx),
     .o_Tx_Done()
     );
     
