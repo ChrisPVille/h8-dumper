@@ -4,7 +4,7 @@ module top(
     input CPU_RESETN,
     output[15:0] LED,
     input[15:0] SW,
-    inout[7:1] dbus_pre,
+    inout[7:0] dbus_pre,
     output textal,
     input twr_pre,
     input trd_pre,

@@ -111,7 +111,7 @@ set_property -dict {PACKAGE_PIN H14 IOSTANDARD LVCMOS33} [get_ports {tres}]
 #This is where the TCK pin is located on the bus-blaster board, so there's nothing we can do but ignore the placement error
 #set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets {JB_IBUF[4]}]
 
-set_property -dict {PACKAGE_PIN E16 IOSTANDARD LVCMOS33} [get_ports {JB7}]
+set_property -dict {PACKAGE_PIN E16 IOSTANDARD LVCMOS33} [get_ports {uart_tx}]
 #set_property PULLUP true [get_ports {JB[7]}]
 
 #set_property -dict {PACKAGE_PIN F13 IOSTANDARD LVCMOS33} [get_ports {JB[8]}]

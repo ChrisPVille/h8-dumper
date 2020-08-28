@@ -42,7 +42,7 @@ module dcontrol(
             if(arm && addr==16'hFB7F && !wr && !already_wrote) begin
                 fifo_wren <= 1;
                 already_wrote <= 1;
-                if(src_addr <= ENDADDR) src_addr <= src_addr + 1;
+                if(src_addr < ENDADDR) src_addr <= src_addr + 1;
                 else done <= 1; 
             end
             else if((!rd||!wr) && addr != 16'hFB7F) already_wrote <= 0;
