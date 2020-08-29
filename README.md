@@ -1,5 +1,7 @@
 # H8 Clock Glitching Dumper
 
+Big ol' word of warning: I wrote this in like a day. It works, but don't expect testbenches, comments, or anything else for that matter.
+
 ### What?
 Mask ROM H8 3297/4 series parts seem to prevent reading back the ROM via the normal process used in the PROM variants.  This is likely a security feature and wasn't unexpected.  That said, I want to dump the ROMs of these parts, and this is the FPGA project containing the clock glitching, memory map, etc. to make it happen.
 
