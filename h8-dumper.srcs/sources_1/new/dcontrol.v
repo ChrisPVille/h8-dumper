@@ -39,13 +39,13 @@ module dcontrol(
             done <= 0;
         end else begin
             fifo_wren <= 0;
-            if(arm && addr==16'hFB7F && !wr && !already_wrote) begin
+            if(arm && addr[3:0]==4'hF && !wr && !already_wrote) begin
                 fifo_wren <= 1;
                 already_wrote <= 1;
                 if(src_addr < ENDADDR) src_addr <= src_addr + 1;
                 else done <= 1; 
             end
-            else if((!rd||!wr) && addr != 16'hFB7F) already_wrote <= 0;
+            else if((!rd||!wr) && addr[3:0] != 4'hF) already_wrote <= 0;
         end
     end
     
@@ -57,21 +57,21 @@ module dcontrol(
         end else begin
             if(already_wrote) arm <= 0; //The address bus looks a little glitchy. Try to prevent nonsense
             
-            if(!rd && addr==16'hFB70) data_out <= 8'h6A; //MOVE.B @src_addr, R0
-            else if(!rd && addr==16'hFB71) data_out <= 8'h00;
-            else if(!rd && addr==16'hFB72) data_out <= src_addr[15:8];
-            else if(!rd && addr==16'hFB73) data_out <= src_addr[7:0];
-            else if(!rd && addr==16'hFB74) data_out <= 8'h6A; //MOVE.B R0, @0xFB7F
-            else if(!rd && addr==16'hFB75) data_out <= 8'h80;
-            else if(!rd && addr==16'hFB76) data_out <= 8'hFB;
-            else if(!rd && addr==16'hFB77) begin
+            if(!rd && addr[3:0]==4'h0) data_out <= 8'h6A; //MOVE.B @src_addr, R0
+            else if(!rd && addr[3:0]==4'h1) data_out <= 8'h00;
+            else if(!rd && addr[3:0]==4'h2) data_out <= src_addr[15:8];
+            else if(!rd && addr[3:0]==4'h3) data_out <= src_addr[7:0];
+            else if(!rd && addr[3:0]==4'h4) data_out <= 8'h6A; //MOVE.B R0, @0xFB7F
+            else if(!rd && addr[3:0]==4'h5) data_out <= 8'h80;
+            else if(!rd && addr[3:0]==4'h6) data_out <= 8'hFB;
+            else if(!rd && addr[3:0]==4'h7) begin
                 data_out <= 8'h7F;
                 arm <= 1;
             end
-            else if(!rd && addr==16'hFB78) data_out <= 8'h5A; //JMP 0xFB70
-            else if(!rd && addr==16'hFB79) data_out <= 8'h00;
-            else if(!rd && addr==16'hFB7A) data_out <= 8'hFB;
-            else if(!rd && addr==16'hFB7B) begin
+            else if(!rd && addr[3:0]==4'h8) data_out <= 8'h5A; //JMP 0xFB70
+            else if(!rd && addr[3:0]==4'h9) data_out <= 8'h00;
+            else if(!rd && addr[3:0]==4'hA) data_out <= 8'hFB;
+            else if(!rd && addr[3:0]==4'hB) begin
                 if(!done) data_out <= 8'h70;
                 else data_out <= 8'h78;
             end

@@ -53,7 +53,7 @@ ila ila(.clk(clk),
         .probe3(trd),
         .probe4(twr),
         .probe5(textal),
-        .probe6(swsync[3]),
+        .probe6(1'b0),
         .probe7(capnow)
         );
 
@@ -79,6 +79,7 @@ glitchy glitchy(
         .clk(clk),
         .rst_n(rst_n),
         .go(swsync[3]),
+        .addr(abus),
         .tres(tres),
         .textal(textal),
         .capnow(capnow)

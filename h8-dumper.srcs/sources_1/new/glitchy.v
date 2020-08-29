@@ -5,6 +5,7 @@ module glitchy(
     input rst_n,
     input go,
     output reg tres,
+    input[15:0] addr,
     output textal,
     output capnow
     );
@@ -32,9 +33,9 @@ module glitchy(
     
     
     reg[31:0] count;
-    localparam RESETTIME = 32'd100_000;
-    localparam INITTIME = 32'd60 + RESETTIME; //60 worked once 
-    localparam GLITCHYTIME = 32'd50000 + INITTIME;
+    localparam RESETTIME = 32'd10_000;
+    localparam INITTIME = 32'd50 + RESETTIME; //60 worked once 
+    localparam GLITCHYTIME = 32'd80000 + INITTIME; //50000 worked for the legos
     
     assign capnow = (state==GLITCHY);
     
@@ -54,7 +55,7 @@ module glitchy(
     end
     
     wire glitchclk;
-    cdiv #(.DIVBY(3)) gdiv (.clkin(clk), //5 worked once
+    cdiv #(.DIVBY(2)) gdiv (.clkin(clk), //5 worked once
                              .rst_n(rst_n),
                              .enable(go),
                              .clkout(glitchclk)
@@ -67,7 +68,10 @@ module glitchy(
         case(state)
             RESET: if(count==RESETTIME) next_state = INIT_CLOCKS;
             INIT_CLOCKS: if(count==INITTIME) next_state = GLITCHY;
-            GLITCHY: if(count==GLITCHYTIME) next_state = FREERUN;
+            GLITCHY: begin
+                if(count==GLITCHYTIME) next_state = FREERUN;
+                //if((addr[15:12] >= 4'h8) && (addr[15:12] <= 4'he)) next_state = FREERUN;
+            end
             FREERUN: ;
         endcase
     end              
